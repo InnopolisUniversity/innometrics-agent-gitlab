@@ -1,8 +1,10 @@
 package innometircs.gitlab.agent;
 
+import innometircs.gitlab.agent.domain.Commit;
 import innometircs.gitlab.agent.domain.Event;
 import innometircs.gitlab.agent.domain.Issue;
 import innometircs.gitlab.agent.domain.Project;
+import innometircs.gitlab.agent.repo.CommitRepo;
 import innometircs.gitlab.agent.repo.EventRepo;
 import innometircs.gitlab.agent.repo.IssueRepo;
 import innometircs.gitlab.agent.repo.ProjectRepo;
@@ -20,6 +22,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class AgentRunner implements ApplicationRunner {
@@ -32,59 +35,48 @@ public class AgentRunner implements ApplicationRunner {
     private EventRepo eventRepo;
     @Autowired
     private IssueRepo issueRepo;
+    @Autowired
+    private CommitRepo commitRepo;
 
     @Override
-    public void run(ApplicationArguments args) throws Exception {
-
-
-        String querry = "projects";
-
-        JSONArray json = get_JSONArray(BASE_URL + querry + new Attributes<String, String>() {{
-            put("visibility", "private");
-            put("private_token", private_token);
-        }}.toString());
-
-        for (Iterator<Object> it = json.iterator(); it.hasNext(); ) {
-            JSONObject projectJson = (JSONObject) it.next();
-
-            JSONArray eventsJson = get_JSONArray(projectJson.getJSONObject("_links").getString("events") + new Attributes<String, String>() {{
-                put("private_token", private_token);
-            }}.toString());
-            Set<Event> events = new LinkedHashSet<>();
-
-            for (Iterator<Object> inner_it = eventsJson.iterator(); inner_it.hasNext(); ) {
-                Event event = new Event((JSONObject)inner_it.next());
-                eventRepo.save(event);
-                events.add(event);
-            }
-
-            JSONArray issuesJson = get_JSONArray(projectJson.getJSONObject("_links").getString("issues") + new Attributes<String, String>() {{
-                put("private_token", private_token);
-            }}.toString());
-            Set<Issue> issues = new LinkedHashSet<>();
-
-            for (Iterator<Object> inner_it = issuesJson.iterator(); inner_it.hasNext(); ) {
-                Issue issue = new Issue((JSONObject)inner_it.next());
-                issueRepo.save(issue);
-                issues.add(issue);
-            }
+    public void run(ApplicationArguments args)  {
 
 
 
+        JSONArray json = get_JSONArray(BASE_URL + "projects" +attributes("visibility=public","private_token"+"="+private_token, "membership=true"));
+
+        for (Object o : json) {
+            JSONObject projectJson = (JSONObject) o;
 
             Project project = new Project(projectJson);
-            if (events.size()!=0)
-            {
-                project.setEvents(events);
-            }
-            if (issues.size()!=0)
-            {
-                project.setIssues(issues);
-            }
+            projectRepo.saveAndFlush(project);
+
+
+            JSONArray eventsJson = get_JSONArray(projectJson.getJSONObject("_links").getString("events") + attributes("private_token" + "=" + private_token));
+            Set<Event> events = new LinkedHashSet<>();
+            eventsJson.forEach(x -> events.add(new Event((JSONObject) x, project)));
+            project.setEvents(events);
+            events.forEach(e -> eventRepo.save(e));
+
+
+            JSONArray issuesJson = get_JSONArray(projectJson.getJSONObject("_links").getString("issues") + attributes("private_token" + "=" + private_token));
+            Set<Issue> issues = new LinkedHashSet<>();
+            issuesJson.forEach(x -> issues.add(new Issue((JSONObject) x, project)));
+            project.setIssues(issues);
+            issues.forEach(issue -> issueRepo.save(issue));
+
+
+            JSONArray commitsJson = get_JSONArray(BASE_URL + "projects/" + project.getProjectId().toString() + "/repository/commits" + attributes("private_token" + "=" + private_token));
+            Set<Commit> commits = new LinkedHashSet<>();
+            commitsJson.forEach(x -> commits.add(new Commit((JSONObject) x, project)));
+            project.setCommits(commits);
+            commits.forEach(commit -> commitRepo.save(commit));
+
 
 
 
             projectRepo.save(project);
+
 
         }
         System.out.println();
@@ -92,19 +84,16 @@ public class AgentRunner implements ApplicationRunner {
     }
 
 
-    private class Attributes<T, E> extends HashMap<T, E> {
-        @Override
-        public String toString() {
-            StringBuilder output = new StringBuilder();
-            output.append("?");
-            for (T elem : super.keySet()) {
-                output.append(elem.toString()).append("=").append(super.get(elem).toString()).append("&");
-            }
-            output.setLength(output.length() - 1);
-            return output.toString();
+    private String attributes(String... attributes){
+        StringBuilder output = new StringBuilder();
+        output.append("?");
+        for (String attribute: attributes){
+            output.append(attribute).append("&");
         }
-    }
+        output.setLength(output.length() - 1);
+        return output.toString();
 
+    }
     JSONArray get_JSONArray(String url) {
 
         try {

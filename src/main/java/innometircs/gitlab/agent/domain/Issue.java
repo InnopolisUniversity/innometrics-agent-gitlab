@@ -2,33 +2,69 @@ package innometircs.gitlab.agent.domain;
 
 import org.json.JSONObject;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
 public class Issue {
 
     @Id
-    @GeneratedValue
     private Long issueId;
 
-    private Long projectId;
-
-    private String state;
-
-    private String title;
+    @ManyToOne
+    @JoinColumn(name = "project_id")
+    private Project project;
 
     private String description;
+    private String state;
+    private String title;
+    private String updatedAt;
+    private String createdAt;
+    private String closedAt;
 
     private Issue(){}
-    public Issue(JSONObject jsonObject)
-    {
-        this.projectId = (long) jsonObject.getInt("project_id");
+
+    public Issue(JSONObject jsonObject,Project project) {
+        this.description = jsonObject.get("description").toString();
         this.state = jsonObject.get("state").toString();
         this.title = jsonObject.get("title").toString();
-        this.description = jsonObject.get("description").toString();
+        this.updatedAt = jsonObject.get("updated_at").toString();
+        this.createdAt = jsonObject.get("created_at").toString();
+        this.closedAt = jsonObject.get("closed_at").toString();
+
+        this.issueId = jsonObject.getLong("id");
+        this.project = project;
     }
 
+    public Long getIssueId() {
+        return issueId;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public String getClosedAt() {
+        return closedAt;
+    }
 
 }

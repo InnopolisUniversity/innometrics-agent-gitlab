@@ -33,13 +33,19 @@ public class Project {
     )
     private Set<Issue> issues;
 
+    @OneToMany(
+            cascade = CascadeType.ALL
+    )
+    private Set<Commit> commits;
+
+
+
     private Project(){}
 
     public Project(JSONObject jsonObject) {
         this.projectId = (long) jsonObject.getInt("id");
         this.name = jsonObject.getString("name");
         this.path = jsonObject.getString("path_with_namespace");
-        this.issues = issues;
     }
 
 
@@ -82,5 +88,13 @@ public class Project {
 
     public void setIssues(Set<Issue> issues) {
         this.issues = issues;
+    }
+
+    public Set<Commit> getCommits() {
+        return commits;
+    }
+
+    public void setCommits(Set<Commit> commits) {
+        this.commits = commits;
     }
 }
