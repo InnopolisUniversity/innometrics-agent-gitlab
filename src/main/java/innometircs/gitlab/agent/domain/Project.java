@@ -22,7 +22,7 @@ public class Project {
     @NotNull
     private String path;
 
-
+// TODO normalize db
 
     @OneToMany(
             cascade = CascadeType.ALL
@@ -36,6 +36,7 @@ public class Project {
     @OneToMany(
             cascade = CascadeType.ALL
     )
+
     private Set<Commit> commits;
 
 

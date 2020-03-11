@@ -1,5 +1,6 @@
 package innometircs.gitlab.agent.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.json.JSONObject;
 
 import javax.persistence.*;
@@ -21,6 +22,7 @@ public class Event {
 
     @ManyToOne
     @JoinColumn(name = "project_id")
+    @JsonIgnore
     private Project project;
 
     private Event(){}

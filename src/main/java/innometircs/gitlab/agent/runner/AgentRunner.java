@@ -1,4 +1,4 @@
-package innometircs.gitlab.agent;
+package innometircs.gitlab.agent.runner;
 
 import innometircs.gitlab.agent.domain.Commit;
 import innometircs.gitlab.agent.domain.Event;
@@ -18,11 +18,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 public class AgentRunner implements ApplicationRunner {
