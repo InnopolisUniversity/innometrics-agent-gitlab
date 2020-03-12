@@ -23,21 +23,21 @@ public class Project {
     private String path;
 
 // TODO normalize db
-
-    @OneToMany(
-            cascade = CascadeType.ALL
-    )
-    private Set<Event> events;
-    @OneToMany(
-            cascade = CascadeType.ALL
-    )
-    private Set<Issue> issues;
-
-    @OneToMany(
-            cascade = CascadeType.ALL
-    )
-
-    private Set<Commit> commits;
+//
+//    @OneToMany(
+//            cascade = CascadeType.ALL
+//    )
+//    private Set<Event> events;
+//    @OneToMany(
+//            cascade = CascadeType.ALL
+//    )
+//    private Set<Issue> issues;
+//
+//    @OneToMany(
+//            cascade = CascadeType.ALL
+//    )
+//
+//    private Set<Commit> commits;
 
 
 
@@ -75,27 +75,27 @@ public class Project {
         return name + " " + path + " " + projectId;
     }
 
-    public Set<Event> getEvents() {
-        return events;
-    }
-
-    public void setEvents(Set<Event> events) {
-        this.events = events;
-    }
-
-    public Set<Issue> getIssues() {
-        return issues;
-    }
-
-    public void setIssues(Set<Issue> issues) {
-        this.issues = issues;
-    }
-
-    public Set<Commit> getCommits() {
-        return commits;
-    }
-
-    public void setCommits(Set<Commit> commits) {
-        this.commits = commits;
-    }
+//    public Set<Event> getEvents() {
+//        return events;
+//    }
+//
+//    public void setEvents(Set<Event> events) {
+//        this.events = events;
+//    }
+//
+//    public Set<Issue> getIssues() {
+//        return issues;
+//    }
+//
+//    public void setIssues(Set<Issue> issues) {
+//        this.issues = issues;
+//    }
+//
+//    public Set<Commit> getCommits() {
+//        return commits;
+//    }
+//
+//    public void setCommits(Set<Commit> commits) {
+//        this.commits = commits;
+//    }
 }

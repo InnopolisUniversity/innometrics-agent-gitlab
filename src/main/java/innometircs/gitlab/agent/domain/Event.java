@@ -20,22 +20,23 @@ public class Event {
     private String targetTitle;
     private String createdAt;
 
-    @ManyToOne
-    @JoinColumn(name = "project_id")
-    @JsonIgnore
-    private Project project;
+//    @ManyToOne
+//    @JoinColumn(name = "project_id")
+//    @JsonIgnore
+//    private Project project;
+    private long projectId;
 
     private Event(){}
 
 
-    public Event(JSONObject jsonObject, Project project) {
+    public Event(JSONObject jsonObject, Long projectId) {
         this.actionName = jsonObject.get("action_name").toString();
         this.targetId = jsonObject.get("target_id").toString();
         this.targetType = jsonObject.get("target_type").toString();
         this.authorId = jsonObject.get("author_id").toString();
         this.targetTitle = jsonObject.get("target_title").toString();
         this.createdAt = jsonObject.get("created_at").toString();
-        this.project = project;
+        this.projectId = projectId;
     }
 
     public Long getEventId() {
@@ -66,7 +67,7 @@ public class Event {
         return createdAt;
     }
 
-    public Project getProject() {
-        return project;
+    public long getProjectId() {
+        return projectId;
     }
 }

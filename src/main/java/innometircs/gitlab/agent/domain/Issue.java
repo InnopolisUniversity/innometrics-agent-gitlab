@@ -11,10 +11,11 @@ public class Issue {
     @Id
     private Long issueId;
 
-    @ManyToOne
-    @JoinColumn(name = "project_id")
-    @JsonIgnore
-    private Project project;
+//    @ManyToOne
+//    @JoinColumn(name = "project_id")
+//    @JsonIgnore
+//    private Project project;
+    private Long projectId;
 
     private String description;
     private String state;
@@ -25,7 +26,7 @@ public class Issue {
 
     private Issue(){}
 
-    public Issue(JSONObject jsonObject,Project project) {
+    public Issue(JSONObject jsonObject, Long projectId) {
         this.description = jsonObject.get("description").toString();
         this.state = jsonObject.get("state").toString();
         this.title = jsonObject.get("title").toString();
@@ -34,15 +35,15 @@ public class Issue {
         this.closedAt = jsonObject.get("closed_at").toString();
 
         this.issueId = jsonObject.getLong("id");
-        this.project = project;
+        this.projectId = projectId;
     }
 
     public Long getIssueId() {
         return issueId;
     }
 
-    public Project getProject() {
-        return project;
+    public Long getProjectId() {
+        return projectId;
     }
 
     public String getDescription() {

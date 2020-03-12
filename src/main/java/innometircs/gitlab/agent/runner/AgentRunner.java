@@ -40,7 +40,7 @@ public class AgentRunner implements ApplicationRunner {
 
 
 
-        JSONArray json = get_JSONArray(BASE_URL + "projects" +attributes("visibility=public","private_token"+"="+private_token, "membership=true"));
+        JSONArray json = get_JSONArray(BASE_URL + "projects" +attributes("visibility=private","private_token"+"="+private_token, "membership=true"));
 
         for (Object o : json) {
             JSONObject projectJson = (JSONObject) o;
@@ -50,24 +50,30 @@ public class AgentRunner implements ApplicationRunner {
 
 
             JSONArray eventsJson = get_JSONArray(projectJson.getJSONObject("_links").getString("events") + attributes("private_token" + "=" + private_token));
-            Set<Event> events = new LinkedHashSet<>();
-            eventsJson.forEach(x -> events.add(new Event((JSONObject) x, project)));
-            project.setEvents(events);
-            events.forEach(e -> eventRepo.save(e));
+//            Set<Event> events = new LinkedHashSet<>();
+//            eventsJson.forEach(x -> events.add(new Event((JSONObject) x, project)));
+//            project.setEvents(events);
+//            events.forEach(e -> eventRepo.save(e));
+            eventsJson.forEach(x -> eventRepo.save(new Event((JSONObject) x, project.getProjectId())));
+
 
 
             JSONArray issuesJson = get_JSONArray(projectJson.getJSONObject("_links").getString("issues") + attributes("private_token" + "=" + private_token));
-            Set<Issue> issues = new LinkedHashSet<>();
-            issuesJson.forEach(x -> issues.add(new Issue((JSONObject) x, project)));
-            project.setIssues(issues);
-            issues.forEach(issue -> issueRepo.save(issue));
+//            Set<Issue> issues = new LinkedHashSet<>();
+//            issuesJson.forEach(x -> issues.add(new Issue((JSONObject) x, project)));
+//            project.setIssues(issues);
+//            issues.forEach(issue -> issueRepo.save(issue));
+
+            issuesJson.forEach(x -> issueRepo.save(new Issue((JSONObject) x, project.getProjectId())));
 
 
             JSONArray commitsJson = get_JSONArray(BASE_URL + "projects/" + project.getProjectId().toString() + "/repository/commits" + attributes("private_token" + "=" + private_token));
-            Set<Commit> commits = new LinkedHashSet<>();
-            commitsJson.forEach(x -> commits.add(new Commit((JSONObject) x, project)));
-            project.setCommits(commits);
-            commits.forEach(commit -> commitRepo.save(commit));
+//            Set<Commit> commits = new LinkedHashSet<>();
+//            commitsJson.forEach(x -> commits.add(new Commit((JSONObject) x, project)));
+//            project.setCommits(commits);
+//            commits.forEach(commit -> commitRepo.save(commit));
+
+            commitsJson.forEach(x -> commitRepo.save(new Commit((JSONObject) x, project.getProjectId())));
 
 
 

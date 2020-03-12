@@ -35,16 +35,14 @@ public class RESTService {
         return project;
     }
 
-    public Set<Event> getEvents(Long projectId){
-        Project project = getProjectById(projectId);
-        return project.getEvents();
+    public List<Event> getEvents(Long projectId){
+
+        return eventRepo.findAllByProjectId(projectId);
     }
-    public Set<Commit> getCommits(Long projectId){
-        Project project = getProjectById(projectId);
-        return project.getCommits();
+    public List<Commit> getCommits(Long projectId){
+        return commitRepo.findAllByProjectId(projectId);
     }
-    public Set<Issue> getIssues(Long projectId){
-        Project project = getProjectById(projectId);
-        return project.getIssues();
+    public List<Issue> getIssues(Long projectId){
+        return issueRepo.findAllByProjectId(projectId);
     }
 }

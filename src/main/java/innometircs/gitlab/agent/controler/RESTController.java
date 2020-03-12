@@ -34,20 +34,17 @@ public class RESTController {
     }
 
     @GetMapping("/projects/{projectId}/events")
-    public Set<Event> getProjectEvents(@PathVariable Long projectId){
-        Set<Event> events = service.getEvents(projectId);
-        return events;
+    public List<Event> getProjectEvents(@PathVariable Long projectId){
+        return service.getEvents(projectId);
     }
 
     @GetMapping("/projects/{projectId}/commits")
-    public Set<Commit> getProjectCommits(@PathVariable Long projectId){
-        Set<Commit> commits = service.getCommits(projectId);
-        return commits;
+    public List<Commit> getProjectCommits(@PathVariable Long projectId){
+        return service.getCommits(projectId);
     }
     @GetMapping("/projects/{projectId}/issues")
-    public Set<Issue> getProjectIssues(@PathVariable Long projectId){
-        Set<Issue> issues = service.getIssues(projectId);
-        return issues;
+    public List<Issue> getProjectIssues(@PathVariable Long projectId){
+        return service.getIssues(projectId);
     }
 
 }
