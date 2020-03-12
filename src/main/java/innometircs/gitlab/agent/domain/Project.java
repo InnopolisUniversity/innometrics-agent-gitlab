@@ -22,7 +22,6 @@ public class Project {
     @NotNull
     private String path;
 
-// TODO normalize db
 //
 //    @OneToMany(
 //            cascade = CascadeType.ALL
