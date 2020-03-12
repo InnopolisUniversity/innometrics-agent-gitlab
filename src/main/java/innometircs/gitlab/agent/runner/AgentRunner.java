@@ -39,8 +39,17 @@ public class AgentRunner implements ApplicationRunner {
     public void run(ApplicationArguments args)  {
 
 
+//
+//        JSONArray json = get_JSONArray();
+        fetch(BASE_URL + "projects" +attributes("visibility=private","private_token"+"="+private_token, "membership=true"));
+        fetch(BASE_URL + "projects" +attributes("visibility=public","private_token"+"="+private_token, "membership=true"));
 
-        JSONArray json = get_JSONArray(BASE_URL + "projects" +attributes("visibility=private","private_token"+"="+private_token, "membership=true"));
+
+    }
+
+    private void fetch(String url){
+
+        JSONArray json = get_JSONArray(url);
 
         for (Object o : json) {
             JSONObject projectJson = (JSONObject) o;
@@ -83,10 +92,7 @@ public class AgentRunner implements ApplicationRunner {
 
         }
         System.out.println();
-
     }
-
-
     private String attributes(String... attributes){
         StringBuilder output = new StringBuilder();
         output.append("?");
