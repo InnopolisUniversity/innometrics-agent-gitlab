@@ -1,0 +1,19 @@
+version: "3"
+services:
+  agent:
+    build: .
+    ports:
+      - 8080:8080
+    links:
+      - db
+    depends_on:
+      - db
+  db:
+    restart: always
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=gitlab
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=root

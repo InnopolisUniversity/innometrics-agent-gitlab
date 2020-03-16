@@ -3,9 +3,12 @@ package innometircs.gitlab.agent.domain;
 
 import org.json.JSONObject;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import java.util.Set;
 
 @Entity
@@ -19,22 +22,21 @@ public class Project {
     @NotNull
     private String path;
 
-
-
-    @OneToMany(
-            cascade = CascadeType.ALL
-    )
-    private Set<Event> events;
-    @OneToMany(
-            cascade = CascadeType.ALL
-    )
-    private Set<Issue> issues;
-
-    @OneToMany(
-            cascade = CascadeType.ALL
-    )
-    @JoinColumn(name = "commitId")
-    private Set<Commit> commits;
+//
+//    @OneToMany(
+//            cascade = CascadeType.ALL
+//    )
+//    private Set<Event> events;
+//    @OneToMany(
+//            cascade = CascadeType.ALL
+//    )
+//    private Set<Issue> issues;
+//
+//    @OneToMany(
+//            cascade = CascadeType.ALL
+//    )
+//
+//    private Set<Commit> commits;
 
 
 
@@ -72,27 +74,27 @@ public class Project {
         return name + " " + path + " " + projectId;
     }
 
-    public Set<Event> getEvents() {
-        return events;
-    }
-
-    public void setEvents(Set<Event> events) {
-        this.events = events;
-    }
-
-    public Set<Issue> getIssues() {
-        return issues;
-    }
-
-    public void setIssues(Set<Issue> issues) {
-        this.issues = issues;
-    }
-
-    public Set<Commit> getCommits() {
-        return commits;
-    }
-
-    public void setCommits(Set<Commit> commits) {
-        this.commits = commits;
-    }
+//    public Set<Event> getEvents() {
+//        return events;
+//    }
+//
+//    public void setEvents(Set<Event> events) {
+//        this.events = events;
+//    }
+//
+//    public Set<Issue> getIssues() {
+//        return issues;
+//    }
+//
+//    public void setIssues(Set<Issue> issues) {
+//        this.issues = issues;
+//    }
+//
+//    public Set<Commit> getCommits() {
+//        return commits;
+//    }
+//
+//    public void setCommits(Set<Commit> commits) {
+//        this.commits = commits;
+//    }
 }
