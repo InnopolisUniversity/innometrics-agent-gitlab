@@ -27,6 +27,7 @@ public class RESTService {
     private CommitRepo commitRepo;
 
     public List<Project> getProjects(){
+
         return projectRepo.findAll();
     }
 

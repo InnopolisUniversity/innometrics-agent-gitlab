@@ -25,7 +25,7 @@ import java.util.Set;
 public class AgentRunner implements ApplicationRunner {
     private String REPO = "https://gitlab.com";
     private String BASE_URL = REPO + "/api/v4/";
-    private String private_token = "Re5inpHzEspP_PfycjgD";
+    private String private_token;
     @Autowired
     private ProjectRepo projectRepo;
     @Autowired
@@ -37,7 +37,7 @@ public class AgentRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args)  {
-
+        this.private_token =  "Re5inpHzEspP_PfycjgD";
 
 //
 //        JSONArray json = get_JSONArray();
@@ -45,6 +45,10 @@ public class AgentRunner implements ApplicationRunner {
         fetch(BASE_URL + "projects" +attributes("visibility=public","private_token"+"="+private_token, "membership=true"));
 
 
+    }
+    public void fetchByToken(String private_token){
+        fetch(BASE_URL + "projects" +attributes("visibility=private","private_token"+"="+private_token, "membership=true"));
+        fetch(BASE_URL + "projects" +attributes("visibility=public","private_token"+"="+private_token, "membership=true"));
     }
 
     private void fetch(String url){

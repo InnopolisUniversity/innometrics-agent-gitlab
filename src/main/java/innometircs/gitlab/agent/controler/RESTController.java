@@ -8,8 +8,10 @@ import innometircs.gitlab.agent.repo.CommitRepo;
 import innometircs.gitlab.agent.repo.EventRepo;
 import innometircs.gitlab.agent.repo.IssueRepo;
 import innometircs.gitlab.agent.repo.ProjectRepo;
+import innometircs.gitlab.agent.runner.AgentRunner;
 import innometircs.gitlab.agent.service.RESTService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ApplicationArguments;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,10 +23,13 @@ import java.util.Set;
 public class RESTController {
     @Autowired
     private RESTService service;
+    @Autowired
+    private AgentRunner agentRunner;
 
 
     @GetMapping("/projects")
     public List<Project> getProjects(){
+        agentRunner.fetchByToken("Re5inpHzEspP_PfycjgD");
         return service.getProjects();
     }
     @GetMapping("/projects/{projectId}")
