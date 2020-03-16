@@ -72,9 +72,6 @@ public class AgentRunner implements ApplicationRunner {
             project.setCommits(commits);
             commits.forEach(commit -> commitRepo.save(commit));
 
-
-
-
             projectRepo.save(project);
 
 

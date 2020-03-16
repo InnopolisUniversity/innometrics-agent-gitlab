@@ -3,12 +3,9 @@ package innometircs.gitlab.agent.domain;
 
 import org.json.JSONObject;
 
-import javax.persistence.CascadeType;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
 import java.util.Set;
 
 @Entity
@@ -36,6 +33,7 @@ public class Project {
     @OneToMany(
             cascade = CascadeType.ALL
     )
+    @JoinColumn(name = "commitId")
     private Set<Commit> commits;
 
 
