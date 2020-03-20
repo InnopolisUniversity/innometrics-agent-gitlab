@@ -12,14 +12,12 @@ import innometircs.gitlab.agent.runner.AgentRunner;
 import innometircs.gitlab.agent.service.RESTService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Set;
 
-@RestController
+@RestController()
 public class RESTController {
     @Autowired
     private RESTService service;
@@ -29,7 +27,6 @@ public class RESTController {
 
     @GetMapping("/projects")
     public List<Project> getProjects(){
-        agentRunner.fetchByToken("Re5inpHzEspP_PfycjgD");
         return service.getProjects();
     }
     @GetMapping("/projects/{projectId}")
@@ -50,6 +47,11 @@ public class RESTController {
     @GetMapping("/projects/{projectId}/issues")
     public List<Issue> getProjectIssues(@PathVariable Long projectId){
         return service.getIssues(projectId);
+    }
+
+    @PostMapping("/projects")
+    public void fetchProjects(@RequestParam(name = "auth_token", required = true) String authToken){
+        agentRunner.fetchByToken(authToken);
     }
 
 }

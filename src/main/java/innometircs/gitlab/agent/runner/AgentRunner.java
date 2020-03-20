@@ -22,7 +22,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Component
-public class AgentRunner implements ApplicationRunner {
+public class AgentRunner {
     private String REPO = "https://gitlab.com";
     private String BASE_URL = REPO + "/api/v4/";
     private String private_token;
@@ -35,23 +35,23 @@ public class AgentRunner implements ApplicationRunner {
     @Autowired
     private CommitRepo commitRepo;
 
-    @Override
-    public void run(ApplicationArguments args)  {
-        this.private_token =  "Re5inpHzEspP_PfycjgD";
-
+//    @Override
+//    public void run(ApplicationArguments args)  {
+//        this.private_token =  "Re5inpHzEspP_PfycjgD";
 //
-//        JSONArray json = get_JSONArray();
-        fetch(BASE_URL + "projects" +attributes("visibility=private","private_token"+"="+private_token, "membership=true"));
-        fetch(BASE_URL + "projects" +attributes("visibility=public","private_token"+"="+private_token, "membership=true"));
-
-
-    }
+////
+////        JSONArray json = get_JSONArray();
+//        fetch(BASE_URL + "projects" +attributes("visibility=private","private_token"+"="+private_token, "membership=true"));
+//        fetch(BASE_URL + "projects" +attributes("visibility=public","private_token"+"="+private_token, "membership=true"));
+//
+//
+//    }
     public void fetchByToken(String private_token){
-        fetch(BASE_URL + "projects" +attributes("visibility=private","private_token"+"="+private_token, "membership=true"));
-        fetch(BASE_URL + "projects" +attributes("visibility=public","private_token"+"="+private_token, "membership=true"));
+        fetch(BASE_URL + "projects" +attributes("visibility=private","private_token"+"="+private_token, "membership=true"), private_token);
+        fetch(BASE_URL + "projects" +attributes("visibility=public","private_token"+"="+private_token, "membership=true"), private_token);
     }
 
-    private void fetch(String url){
+    private void fetch(String url, String private_token){
 
         JSONArray json = get_JSONArray(url);
 
