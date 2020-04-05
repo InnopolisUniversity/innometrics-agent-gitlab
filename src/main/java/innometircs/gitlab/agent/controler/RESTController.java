@@ -4,31 +4,25 @@ import innometircs.gitlab.agent.domain.Commit;
 import innometircs.gitlab.agent.domain.Event;
 import innometircs.gitlab.agent.domain.Issue;
 import innometircs.gitlab.agent.domain.Project;
-import innometircs.gitlab.agent.repo.CommitRepo;
-import innometircs.gitlab.agent.repo.EventRepo;
-import innometircs.gitlab.agent.repo.IssueRepo;
-import innometircs.gitlab.agent.repo.ProjectRepo;
-import innometircs.gitlab.agent.runner.AgentRunner;
 import innometircs.gitlab.agent.service.RESTService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ApplicationArguments;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 
 @RestController()
 public class RESTController {
     @Autowired
     private RESTService service;
-    @Autowired
-    private AgentRunner agentRunner;
 
 
-    @GetMapping("/projects")
-    public List<Project> getProjects(){
-        return service.getProjects();
-    }
+//    @GetMapping("/projects")
+//    public List<Project> getProjects(){
+//        return service.getProjects();
+//    }
     @GetMapping("/projects/{projectId}")
     public Project getProjectById(@PathVariable Long projectId){
         Project project = service.getProjectById(projectId);
@@ -49,9 +43,19 @@ public class RESTController {
         return service.getIssues(projectId);
     }
 
-    @PostMapping("/projects")
-    public void fetchProjects(@RequestParam(name = "auth_token", required = true) String authToken){
-        agentRunner.fetchByToken(authToken);
+    @PostMapping("projects")
+    public void fetchProject(@RequestParam(name = "auth_token") String authToken,@RequestParam(name = "repo_name", required = false) String repoName) throws IOException {
+        service.fetchRepo(authToken, repoName);
+    }
+    @GetMapping("/projects")
+    public List<Project> getProjects(@RequestParam(name = "auth_token", required = true) String authToken, @RequestParam(name = "fetched") String fetched) throws IOException {
+        if (fetched.equals("true")){
+            return service.getProjectsByToken(authToken);
+        }
+        else {
+            return service.getProjects(authToken);
+
+        }
     }
 
 }
