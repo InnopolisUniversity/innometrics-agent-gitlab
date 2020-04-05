@@ -37,7 +37,7 @@ public class RESTService {
 
 
     public List<Project> getProjects(String private_token) throws IOException {
-
+        validateToken(private_token);
 
         List<Project> projects = new ArrayList<>();
 
