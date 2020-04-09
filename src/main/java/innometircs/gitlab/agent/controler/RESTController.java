@@ -44,7 +44,7 @@ public class RESTController {
     }
 
     @PostMapping("projects")
-    public void fetchProject(@RequestParam(name = "auth_token") String authToken,@RequestParam(name = "repo_name", required = false) String repoName) throws IOException {
+    public void fetchProject(@RequestParam(name = "auth_token") String authToken,@RequestParam(name = "repo_name", required = false) String repoName) throws Exception {
         service.fetchRepo(authToken, repoName);
     }
     @GetMapping("/projects")

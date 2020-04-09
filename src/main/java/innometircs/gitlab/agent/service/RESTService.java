@@ -1,5 +1,6 @@
 package innometircs.gitlab.agent.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import innometircs.gitlab.agent.domain.Commit;
 import innometircs.gitlab.agent.domain.Event;
 import innometircs.gitlab.agent.domain.Issue;
@@ -16,15 +17,33 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class RESTService {
     private String REPO = "https://gitlab.com";
     private String BASE_URL = REPO + "/api/v4/";
+
+    private String HOST_IP = System.getenv("HOST_IP");
+
+    public String getHOST_IP() {
+        return HOST_IP;
+    }
 
     @Autowired
     private ProjectRepo projectRepo;
@@ -58,31 +77,36 @@ public class RESTService {
 
         return projects;
     }
-    public void fetchRepo( String private_token, String repoName) throws IOException {
+
+    public void fetchRepo(String private_token, String repoName) throws Exception {
         validateToken(private_token);
 
-
+        Boolean flag = false;
+        Project project = null;
         JSONArray json = get_JSONArray(BASE_URL + "projects" + attributes("visibility=private", "private_token" + "=" + private_token, "membership=true"));
 
         for (Object o : json) {
             JSONObject projectJson = (JSONObject) o;
 
-            if (projectJson.getString("name").equals(repoName)){
-                Project project = new Project(projectJson, private_token);
+            if (projectJson.getString("name").equals(repoName)) {
+                project = new Project(projectJson, private_token);
 
                 projectRepo.saveAndFlush(project);
 
                 JSONArray eventsJson = get_JSONArray(projectJson.getJSONObject("_links").getString("events") + attributes("private_token" + "=" + private_token));
-                eventsJson.forEach(x -> eventRepo.save(new Event((JSONObject) x, project.getProjectId())));
+                Project finalProject = project;
+                eventsJson.forEach(x -> eventRepo.save(new Event((JSONObject) x, finalProject.getProjectId())));
 
                 JSONArray issuesJson = get_JSONArray(projectJson.getJSONObject("_links").getString("issues") + attributes("private_token" + "=" + private_token));
-                issuesJson.forEach(x -> issueRepo.save(new Issue((JSONObject) x, project.getProjectId())));
+                Project finalProject1 = project;
+                issuesJson.forEach(x -> issueRepo.save(new Issue((JSONObject) x, finalProject1.getProjectId())));
 
                 JSONArray commitsJson = get_JSONArray(BASE_URL + "projects/" + project.getProjectId().toString() + "/repository/commits" + attributes("private_token" + "=" + private_token));
-                commitsJson.forEach(x -> commitRepo.save(new Commit((JSONObject) x, project.getProjectId())));
+                Project finalProject2 = project;
+                commitsJson.forEach(x -> commitRepo.save(new Commit((JSONObject) x, finalProject2.getProjectId())));
 
                 projectRepo.save(project);
-                return;
+                flag = true;
             }
         }
 
@@ -91,27 +115,40 @@ public class RESTService {
         for (Object o : json) {
             JSONObject projectJson = (JSONObject) o;
 
-            if (projectJson.getString("name").equals(repoName)){
-                Project project = new Project(projectJson, private_token);
+            if (projectJson.getString("name").equals(repoName)) {
+                project = new Project(projectJson, private_token);
 
                 projectRepo.saveAndFlush(project);
 
                 JSONArray eventsJson = get_JSONArray(projectJson.getJSONObject("_links").getString("events") + attributes("private_token" + "=" + private_token));
-                eventsJson.forEach(x -> eventRepo.save(new Event((JSONObject) x, project.getProjectId())));
+                Project finalProject3 = project;
+                eventsJson.forEach(x -> eventRepo.save(new Event((JSONObject) x, finalProject3.getProjectId())));
 
                 JSONArray issuesJson = get_JSONArray(projectJson.getJSONObject("_links").getString("issues") + attributes("private_token" + "=" + private_token));
-                issuesJson.forEach(x -> issueRepo.save(new Issue((JSONObject) x, project.getProjectId())));
+                Project finalProject4 = project;
+                issuesJson.forEach(x -> issueRepo.save(new Issue((JSONObject) x, finalProject4.getProjectId())));
 
                 JSONArray commitsJson = get_JSONArray(BASE_URL + "projects/" + project.getProjectId().toString() + "/repository/commits" + attributes("private_token" + "=" + private_token));
-                commitsJson.forEach(x -> commitRepo.save(new Commit((JSONObject) x, project.getProjectId())));
+                Project finalProject5 = project;
+                commitsJson.forEach(x -> commitRepo.save(new Commit((JSONObject) x, finalProject5.getProjectId())));
 
                 projectRepo.save(project);
-                return;
+                flag = true;
             }
         }
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "invalid repository name");
+
+        if (flag) {
+            JSONArray hooks = get_JSONArray(BASE_URL + "projects/"+project.getProjectId()+"/hooks"+attributes("private_token="+private_token));
+            if ( hooks.toList().stream().filter(x -> ((HashMap<String,Object>) x).get("url").equals(HOST_IP)).collect(Collectors.toList()).size() == 0){
+                sendPost(BASE_URL + "projects/"+project.getProjectId()+"/hooks","private_token="+private_token,"push_events=true","issues_events=true","enable_ssl_verification=false", "url="+HOST_IP);
+            }
+
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "invalid repository name");
+        }
 
     }
+
     public Project getProjectById(Long projectId) {
         Project project = projectRepo.findById(projectId).orElseThrow();
         return project;
@@ -146,7 +183,6 @@ public class RESTService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "invalid private token");
         }
     }
-
 
 
     private Boolean tokenStored(String token) {
@@ -205,5 +241,90 @@ public class RESTService {
                 new JSONTokener(
                         new URL(url)
                                 .openStream()));
+    }
+
+
+    private static HttpURLConnection con;
+    private void sendGet() throws Exception {
+
+//        HttpRequest request = HttpRequest.newBuilder()
+//                .GET()
+//                .uri(URI.create("https://httpbin.org/get"))
+//                .setHeader("User-Agent", "Java 11 HttpClient Bot")
+//                .build();
+//
+//        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+//
+//        // print status code
+//        System.out.println(response.statusCode());
+//
+//        // print response body
+//        System.out.println(response.body());
+
+    }
+
+    private void sendPost(String url, String... params) throws Exception {
+        var values = new HashMap<String, String>() {{
+//            for (String param : params) {
+//                put(param.split(":")[0], param.split(":")[1]);
+//            }
+//            put("name", "John Doe");
+//            put ("occupation", "gardener");
+        }};
+
+        var objectMapper = new ObjectMapper();
+        String requestBody = objectMapper
+                .writeValueAsString(values);
+
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url + attributes(params)))
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .build();
+
+        HttpResponse<String> response = client.send(request,
+                HttpResponse.BodyHandlers.ofString());
+
+        System.out.println(response.body());
+//        var url = "https://httpbin.org/post";
+//        var urlParameters = attributes(params);
+//        byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
+//
+//        try {
+//
+//            var myurl = new URL(url);
+//            con = (HttpURLConnection) myurl.openConnection();
+//
+//            con.setDoOutput(true);
+//            con.setRequestMethod("POST");
+//            con.setRequestProperty("User-Agent", "Java client");
+//            con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+//
+//            try (var wr = new DataOutputStream(con.getOutputStream())) {
+//
+//                wr.write(postData);
+//            }
+//
+//            StringBuilder content;
+//
+//            try (var br = new BufferedReader(
+//                    new InputStreamReader(con.getInputStream()))) {
+//
+//                String line;
+//                content = new StringBuilder();
+//
+//                while ((line = br.readLine()) != null) {
+//                    content.append(line);
+//                    content.append(System.lineSeparator());
+//                }
+//            }
+//
+//            System.out.println(content.toString());
+//
+//        } finally {
+//
+//            con.disconnect();
+//        }
+
     }
 }
