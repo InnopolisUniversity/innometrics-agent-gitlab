@@ -39,7 +39,7 @@ public class RESTService {
     private String REPO = "https://gitlab.com";
     private String BASE_URL = REPO + "/api/v4/";
 
-    private String HOST_IP = System.getenv("HOST_IP");
+    private String HOST_IP = System.getenv("HOST_IP") + "/hook";
 
     public String getHOST_IP() {
         return HOST_IP;
