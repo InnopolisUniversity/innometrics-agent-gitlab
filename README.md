@@ -6,3 +6,5 @@ What to do?
 * write public ip of host on which agent to deploy
 * write db credentials
 * run docker-compose up 
+
+Also you can check documentation via swagger
