@@ -1,6 +1,7 @@
 package innometircs.gitlab.agent.service;
 
 import innometircs.gitlab.agent.domain.Commit;
+import innometircs.gitlab.agent.domain.Hook;
 import innometircs.gitlab.agent.repo.CommitRepo;
 import innometircs.gitlab.agent.repo.HookRepository;
 import org.json.JSONObject;
@@ -35,6 +36,7 @@ public class HookService {
                     System.out.println(commit);
                     commitRepo.save(commit);
                 }
+                hookRepository.save(new Hook(hookJson));
 
             case "issue":
                 break;

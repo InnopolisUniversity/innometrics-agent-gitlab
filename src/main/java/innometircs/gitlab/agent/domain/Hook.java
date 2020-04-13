@@ -16,20 +16,16 @@ public class Hook {
 
     private String data;
 
-    private Boolean isProcessed;
-
     private Hook(){};
 
-    public Hook(String type, String data, Boolean isProcessed) {
+    public Hook(String type, String data) {
         this.type = type;
         this.data = data;
-        this.isProcessed = isProcessed;
     }
 
     public Hook(JSONObject jsonObject){
         this.type = jsonObject.getString("object_kind");
         this.data = jsonObject.toString();
-        this.isProcessed = false;
     }
 
     public Long getHookId() {
@@ -44,7 +40,4 @@ public class Hook {
         return data;
     }
 
-    public Boolean getProcessed() {
-        return isProcessed;
-    }
 }
