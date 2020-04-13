@@ -9,7 +9,7 @@ services:
     depends_on:
       - db
     environment:
-      - HOST_IP={write_ip_of_host_here}
+      - 'HOST_IP=http://YOUR_IP_HERE'
   db:
     restart: always
     image: postgres
