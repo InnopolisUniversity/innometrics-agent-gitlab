@@ -12,7 +12,7 @@ public class AgentApplication {
 	static RESTService restService;
 	public static void main(String[] args) {
 		SpringApplication.run(AgentApplication.class, args);
-		System.out.println("HOST IP IS" + restService.getHOST_IP());
+	//	System.out.println("HOST IP IS" + restService.getHOST_IP());
 	}
 
 }
