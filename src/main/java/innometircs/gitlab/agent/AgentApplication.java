@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
 public class AgentApplication {
-	@Autowired
-	static RESTService restService;
+//	@Autowired
+//	static RESTService restService;
 	public static void main(String[] args) {
 		SpringApplication.run(AgentApplication.class, args);
 	//	System.out.println("HOST IP IS" + restService.getHOST_IP());
