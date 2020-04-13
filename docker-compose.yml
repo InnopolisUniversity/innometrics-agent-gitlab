@@ -9,7 +9,10 @@ services:
     depends_on:
       - db
     environment:
-      - 'HOST_IP=http://YOUR_IP_HERE:8080'
+      - 'HOST_IP=http://3.16.159.7:8080'
+      - 'DB_SCHEMA=public'
+      - "DB_HOST_IP=db"
+
   db:
     restart: always
     image: postgres
