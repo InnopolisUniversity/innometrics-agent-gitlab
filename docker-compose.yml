@@ -4,14 +4,18 @@ services:
     build: .
     ports:
       - 8080:8080
+    environment:
+      - 'HOST_IP=http://3.16.159.7:8080' #for web hook
+      - "DB_HOST_IP=db"
+      - 'DB_NAME=gitlab'
+      - 'DB_SCHEMA=public'
+      - "DB_USER=postgres"
+      - "DB_PASSWORD=root"
+
     links:
       - db
     depends_on:
       - db
-    environment:
-      - 'HOST_IP=http://3.16.159.7:8080'
-      - 'DB_SCHEMA=public'
-      - "DB_HOST_IP=db"
 
   db:
     restart: always
