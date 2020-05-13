@@ -17,6 +17,10 @@ public class HookService {
     @Autowired
     CommitRepo commitRepo;
 
+    /**
+     * Nahdle incoming hook
+     * @param hookJson data in json format
+     */
     public void get_hook(JSONObject hookJson) {
         String type = hookJson.getString("object_kind");
 

@@ -27,14 +27,14 @@ class AgentApplicationTests {
 	@Test
 	void invalidToken() {
 		Exception exception = assertThrows(ResponseStatusException.class,
-				() -> restController.getProjects("invalid","f"));
+				() -> restController.getProjects("invalid",false));
 
 		assertEquals(exception.getMessage(), "404 NOT_FOUND \"invalid private token\"");
 	}
 	@Test
 	void validToken() throws IOException {
 
-		List<Project> projects = restController.getProjects("kEUX1NcEmfzzZ2GcX9LW","false");
+		List<Project> projects = restController.getProjects("kEUX1NcEmfzzZ2GcX9LW",false);
 		assertNotNull(projects);
 
 	}
@@ -60,7 +60,7 @@ class AgentApplicationTests {
 
 		assertDoesNotThrow(()->restController.fetchProject(token,repoName));
 
-		List<Project> fetchedProjects = restController.getProjects(token,"true");
+		List<Project> fetchedProjects = restController.getProjects(token,true);
 		assertTrue(fetchedProjects.stream().map(p -> p.getName()).anyMatch(p -> p.equals(repoName)));
 
 		Project fetchedProject = fetchedProjects.stream().filter(p->p.getName().equals(repoName)).findFirst().orElseThrow();

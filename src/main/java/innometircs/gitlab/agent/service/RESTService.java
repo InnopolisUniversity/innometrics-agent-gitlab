@@ -36,7 +36,10 @@ import java.util.stream.Collectors;
 
 @Service
 public class RESTService {
+
+    // CONFIGS
     private String REPO = "https://gitlab.com";
+
     private String BASE_URL = REPO + "/api/v4/";
 
     private String HOST_IP = System.getenv("HOST_IP") + "/hook";
@@ -55,11 +58,18 @@ public class RESTService {
     private CommitRepo commitRepo;
 
 
+    /**
+     * Get all repos from gitlab server by provided private_token(auth_token)
+     * @param private_token
+     * @return list of projects(repos)
+     * @throws IOException
+     */
     public List<Project> getProjects(String private_token) throws IOException {
         validateToken(private_token);
 
         List<Project> projects = new ArrayList<>();
 
+        // fetch all private repos
         JSONArray json = get_JSONArray(BASE_URL + "projects" + attributes("visibility=private", "private_token" + "=" + private_token, "membership=true"));
 
         for (Object o : json) {
@@ -67,6 +77,9 @@ public class RESTService {
 
             projects.add(new Project(projectJson, private_token));
         }
+
+        // fetch all public repos
+
         json = get_JSONArray(BASE_URL + "projects" + attributes("visibility=public", "private_token" + "=" + private_token, "membership=true"));
 
         for (Object o : json) {
@@ -78,13 +91,24 @@ public class RESTService {
         return projects;
     }
 
+
+    /**
+     * Fetch all data from gitlab and then store it locally to db.
+     * Also set up webhook
+     * @param private_token
+     * @param repoName
+     * @throws Exception
+     */
     public void fetchRepo(String private_token, String repoName) throws Exception {
         validateToken(private_token);
 
         Boolean flag = false;
         Project project = null;
-        JSONArray json = get_JSONArray(BASE_URL + "projects" + attributes("visibility=private", "private_token" + "=" + private_token, "membership=true"));
 
+        // Get all repos, select the one that we want to fetch (repoName).
+        // Section for private repos
+
+        JSONArray json = get_JSONArray(BASE_URL + "projects" + attributes("visibility=private", "private_token" + "=" + private_token, "membership=true"));
         for (Object o : json) {
             JSONObject projectJson = (JSONObject) o;
 
@@ -110,6 +134,7 @@ public class RESTService {
             }
         }
 
+        // Section for public repos
         json = get_JSONArray(BASE_URL + "projects" + attributes("visibility=public", "private_token" + "=" + private_token, "membership=true"));
 
         for (Object o : json) {
@@ -136,7 +161,7 @@ public class RESTService {
                 flag = true;
             }
         }
-
+        // if found, then set up hook(send post request to gilab
         if (flag) {
             JSONArray hooks = get_JSONArray(BASE_URL + "projects/"+project.getProjectId()+"/hooks"+attributes("private_token="+private_token));
             if ( hooks.toList().stream().filter(x -> ((HashMap<String,Object>) x).get("url").equals(HOST_IP)).collect(Collectors.toList()).size() == 0){
@@ -149,11 +174,23 @@ public class RESTService {
 
     }
 
+
+    /**
+     * Get certain repo from db
+     * @param projectId
+     * @return
+     */
     public Project getProjectById(Long projectId) {
         Project project = projectRepo.findById(projectId).orElseThrow();
         return project;
     }
 
+    /**
+     * Get all repos that are stored in db
+     * @param token
+     * @return list of projects
+     * @throws IOException
+     */
     public List<Project> getProjectsByToken(String token) throws IOException {
         validateToken(token);
         if (!tokenStored(token)) {
@@ -162,20 +199,36 @@ public class RESTService {
         return projectRepo.findAllByToken(token);
     }
 
+    /**
+     * get all events for that project
+     * @param projectId
+     * @return list of events
+     */
     public List<Event> getEvents(Long projectId) {
 
         return eventRepo.findAllByProjectId(projectId);
     }
-
+    /**
+     * get all commits for that project
+     * @param projectId
+     * @return list of commits
+     */
     public List<Commit> getCommits(Long projectId) {
         return commitRepo.findAllByProjectId(projectId);
     }
-
+    /**
+     * get all issues for that project
+     * @param projectId
+     * @return list of issues
+     */
     public List<Issue> getIssues(Long projectId) {
         return issueRepo.findAllByProjectId(projectId);
     }
 
-
+    /**
+     * Validates provided token. Send test request to gitlab server. If request is not accepted (IOException is thrown, then auth token is invalid)
+     * @param token
+     */
     private void validateToken(String token) {
         try {
             get_JSONArray(BASE_URL + "projects" + attributes("visibility=private", "private_token" + "=" + token, "membership=true"));
@@ -184,46 +237,28 @@ public class RESTService {
         }
     }
 
-
+    /**
+     * True if some repost were fetched for that auth toke
+     * False otherwise
+     * @param token
+     * @return
+     */
     private Boolean tokenStored(String token) {
         return projectRepo.findAllByToken(token).size() != 0;
     }
 
+    /**
+     * True if repo is stored
+     * False otherwise
+     * @param repoName
+     * @param token
+     * @return
+     */
     private Boolean repoStored(String repoName, String token) {
         return projectRepo.findByNameAndToken(repoName, token).isPresent();
     }
-//    public void fetchByToken(String private_token, String) throws IOException {
-//        fetch(BASE_URL + "projects" +attributes("visibility=private","private_token"+"="+private_token, "membership=true"), private_token);
-//        fetch(BASE_URL + "projects" +attributes("visibility=public","private_token"+"="+private_token, "membership=true"), private_token);
-//    }
 
-
-    //    private void fetch(String url, String private_token) throws IOException {
-//
-//
-//        JSONArray json = get_JSONArray(url);
-//
-//        for (Object o : json) {
-//            JSONObject projectJson = (JSONObject) o;
-//
-//            Project project = new Project(projectJson, private_token);
-//            projectRepo.saveAndFlush(project);
-//
-//            JSONArray eventsJson = get_JSONArray(projectJson.getJSONObject("_links").getString("events") + attributes("private_token" + "=" + private_token));
-//            eventsJson.forEach(x -> eventRepo.save(new Event((JSONObject) x, project.getProjectId())));
-//
-//            JSONArray issuesJson = get_JSONArray(projectJson.getJSONObject("_links").getString("issues") + attributes("private_token" + "=" + private_token));
-//            issuesJson.forEach(x -> issueRepo.save(new Issue((JSONObject) x, project.getProjectId())));
-//
-//            JSONArray commitsJson = get_JSONArray(BASE_URL + "projects/" + project.getProjectId().toString() + "/repository/commits" + attributes("private_token" + "=" + private_token));
-//            commitsJson.forEach(x -> commitRepo.save(new Commit((JSONObject) x, project.getProjectId())));
-//
-//            projectRepo.save(project);
-//        }
-//
-//    }
-
-
+    // UTIL FUNCTIONS
     private String attributes(String... attributes) {
         StringBuilder output = new StringBuilder();
         output.append("?");
@@ -244,33 +279,9 @@ public class RESTService {
     }
 
 
-    private static HttpURLConnection con;
-    private void sendGet() throws Exception {
-
-//        HttpRequest request = HttpRequest.newBuilder()
-//                .GET()
-//                .uri(URI.create("https://httpbin.org/get"))
-//                .setHeader("User-Agent", "Java 11 HttpClient Bot")
-//                .build();
-//
-//        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-//
-//        // print status code
-//        System.out.println(response.statusCode());
-//
-//        // print response body
-//        System.out.println(response.body());
-
-    }
 
     private void sendPost(String url, String... params) throws Exception {
-        var values = new HashMap<String, String>() {{
-//            for (String param : params) {
-//                put(param.split(":")[0], param.split(":")[1]);
-//            }
-//            put("name", "John Doe");
-//            put ("occupation", "gardener");
-        }};
+        var values = new HashMap<String, String>();
 
         var objectMapper = new ObjectMapper();
         String requestBody = objectMapper
@@ -286,45 +297,5 @@ public class RESTService {
                 HttpResponse.BodyHandlers.ofString());
 
         System.out.println(response.body());
-//        var url = "https://httpbin.org/post";
-//        var urlParameters = attributes(params);
-//        byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-//
-//        try {
-//
-//            var myurl = new URL(url);
-//            con = (HttpURLConnection) myurl.openConnection();
-//
-//            con.setDoOutput(true);
-//            con.setRequestMethod("POST");
-//            con.setRequestProperty("User-Agent", "Java client");
-//            con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-//
-//            try (var wr = new DataOutputStream(con.getOutputStream())) {
-//
-//                wr.write(postData);
-//            }
-//
-//            StringBuilder content;
-//
-//            try (var br = new BufferedReader(
-//                    new InputStreamReader(con.getInputStream()))) {
-//
-//                String line;
-//                content = new StringBuilder();
-//
-//                while ((line = br.readLine()) != null) {
-//                    content.append(line);
-//                    content.append(System.lineSeparator());
-//                }
-//            }
-//
-//            System.out.println(content.toString());
-//
-//        } finally {
-//
-//            con.disconnect();
-//        }
-
     }
 }
