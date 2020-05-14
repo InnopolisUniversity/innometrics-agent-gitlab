@@ -7,4 +7,4 @@ What to do?
 * write db credentials
 * run docker-compose up 
 
-Also you can check documentation via swagger
+Also you can check documentation via swagger and in folder "documentation"
