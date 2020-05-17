@@ -1,22 +1,14 @@
 package innometircs.gitlab.agent.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.json.JSONObject;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-
 @Entity
 public class Commit {
     @Id
     private String commitId;
 
-//    @ManyToOne
-//    @JoinColumn(name = "project_id")
-//    @JsonIgnore
-//    private Project project;
     private Long projectId;
 
     private String authorName;
@@ -25,7 +17,7 @@ public class Commit {
     private String title;
     private String message;
 
-    private Commit(){}
+    public Commit(){}
 
     public Commit(JSONObject jsonObject, Long projectId) {
         this.commitId = jsonObject.get("id").toString();
@@ -35,6 +27,16 @@ public class Commit {
         this.title = jsonObject.get("title").toString();
         this.message = jsonObject.get("message").toString();
         this.projectId = projectId;
+    }
+
+    public Commit(String commitId, Long projectId, String authorName, String committedDate, String createdAt, String title, String message) {
+        this.commitId = commitId;
+        this.projectId = projectId;
+        this.authorName = authorName;
+        this.committedDate = committedDate;
+        this.createdAt = createdAt;
+        this.title = title;
+        this.message = message;
     }
 
     public String getCommitId() {

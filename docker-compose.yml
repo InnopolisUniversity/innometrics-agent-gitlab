@@ -4,16 +4,25 @@ services:
     build: .
     ports:
       - 8080:8080
-    links:
-      - db
-    depends_on:
-      - db
-  db:
-    restart: always
-    image: postgres
-    ports:
-      - "5432:5432"
     environment:
-      - POSTGRES_DB=gitlab
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=root
+      - 'HOST_IP=http://3.16.159.7:8080' #for web hook
+      - "DB_HOST_IP=db"
+      - 'DB_NAME=gitlab'
+      - 'DB_SCHEMA=public'
+      - "DB_USER=postgres"
+      - "DB_PASSWORD=root"
+#
+#    links:
+#      - db
+#    depends_on:
+#      - db
+#
+#  db:
+#    restart: always
+#    image: postgres
+#    ports:
+#      - "5432:5432"
+#    environment:
+#      - POSTGRES_DB=gitlab
+#      - POSTGRES_USER=postgres
+#      - POSTGRES_PASSWORD=root

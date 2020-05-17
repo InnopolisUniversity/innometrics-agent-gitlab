@@ -22,30 +22,18 @@ public class Project {
     @NotNull
     private String path;
 
-//
-//    @OneToMany(
-//            cascade = CascadeType.ALL
-//    )
-//    private Set<Event> events;
-//    @OneToMany(
-//            cascade = CascadeType.ALL
-//    )
-//    private Set<Issue> issues;
-//
-//    @OneToMany(
-//            cascade = CascadeType.ALL
-//    )
-//
-//    private Set<Commit> commits;
+    @NotNull
+    private String token;
 
 
 
     private Project(){}
 
-    public Project(JSONObject jsonObject) {
+    public Project(JSONObject jsonObject, String token) {
         this.projectId = (long) jsonObject.getInt("id");
         this.name = jsonObject.getString("name");
         this.path = jsonObject.getString("path_with_namespace");
+        this.token = token;
     }
 
 
@@ -69,12 +57,16 @@ public class Project {
         this.path = path;
     }
 
+    public String getToken() {
+        return token;
+    }
     @Override
     public String toString() {
         return name + " " + path + " " + projectId;
     }
 
-//    public Set<Event> getEvents() {
+
+    //    public Set<Event> getEvents() {
 //        return events;
 //    }
 //
