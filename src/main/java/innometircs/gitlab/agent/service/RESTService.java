@@ -70,7 +70,7 @@ public class RESTService {
         List<Project> projects = new ArrayList<>();
 
         // fetch all private repos
-        JSONArray json = get_JSONArray(BASE_URL + "projects" + attributes("visibility=private", "private_token" + "=" + private_token, "membership=true"));
+        JSONArray json = get_JSONArray(BASE_URL + "projects" + attributes("visibility=private", "access_token" + "=" + private_token, "membership=true"));
 
         for (Object o : json) {
             JSONObject projectJson = (JSONObject) o;
@@ -80,7 +80,7 @@ public class RESTService {
 
         // fetch all public repos
 
-        json = get_JSONArray(BASE_URL + "projects" + attributes("visibility=public", "private_token" + "=" + private_token, "membership=true"));
+        json = get_JSONArray(BASE_URL + "projects" + attributes("visibility=public", "access_token" + "=" + private_token, "membership=true"));
 
         for (Object o : json) {
             JSONObject projectJson = (JSONObject) o;
@@ -108,7 +108,7 @@ public class RESTService {
         // Get all repos, select the one that we want to fetch (repoName).
         // Section for private repos
 
-        JSONArray json = get_JSONArray(BASE_URL + "projects" + attributes("visibility=private", "private_token" + "=" + private_token, "membership=true"));
+        JSONArray json = get_JSONArray(BASE_URL + "projects" + attributes("visibility=private", "access_token" + "=" + private_token, "membership=true"));
         for (Object o : json) {
             JSONObject projectJson = (JSONObject) o;
 
@@ -117,15 +117,15 @@ public class RESTService {
 
                 projectRepo.saveAndFlush(project);
 
-                JSONArray eventsJson = get_JSONArray(projectJson.getJSONObject("_links").getString("events") + attributes("private_token" + "=" + private_token));
+                JSONArray eventsJson = get_JSONArray(projectJson.getJSONObject("_links").getString("events") + attributes("access_token" + "=" + private_token));
                 Project finalProject = project;
                 eventsJson.forEach(x -> eventRepo.save(new Event((JSONObject) x, finalProject.getProjectId())));
 
-                JSONArray issuesJson = get_JSONArray(projectJson.getJSONObject("_links").getString("issues") + attributes("private_token" + "=" + private_token));
+                JSONArray issuesJson = get_JSONArray(projectJson.getJSONObject("_links").getString("issues") + attributes("access_token" + "=" + private_token));
                 Project finalProject1 = project;
                 issuesJson.forEach(x -> issueRepo.save(new Issue((JSONObject) x, finalProject1.getProjectId())));
 
-                JSONArray commitsJson = get_JSONArray(BASE_URL + "projects/" + project.getProjectId().toString() + "/repository/commits" + attributes("private_token" + "=" + private_token));
+                JSONArray commitsJson = get_JSONArray(BASE_URL + "projects/" + project.getProjectId().toString() + "/repository/commits" + attributes("access_token" + "=" + private_token));
                 Project finalProject2 = project;
                 commitsJson.forEach(x -> commitRepo.save(new Commit((JSONObject) x, finalProject2.getProjectId())));
 
@@ -135,7 +135,7 @@ public class RESTService {
         }
 
         // Section for public repos
-        json = get_JSONArray(BASE_URL + "projects" + attributes("visibility=public", "private_token" + "=" + private_token, "membership=true"));
+        json = get_JSONArray(BASE_URL + "projects" + attributes("visibility=public", "access_token" + "=" + private_token, "membership=true"));
 
         for (Object o : json) {
             JSONObject projectJson = (JSONObject) o;
@@ -145,15 +145,15 @@ public class RESTService {
 
                 projectRepo.saveAndFlush(project);
 
-                JSONArray eventsJson = get_JSONArray(projectJson.getJSONObject("_links").getString("events") + attributes("private_token" + "=" + private_token));
+                JSONArray eventsJson = get_JSONArray(projectJson.getJSONObject("_links").getString("events") + attributes("access_token" + "=" + private_token));
                 Project finalProject3 = project;
                 eventsJson.forEach(x -> eventRepo.save(new Event((JSONObject) x, finalProject3.getProjectId())));
 
-                JSONArray issuesJson = get_JSONArray(projectJson.getJSONObject("_links").getString("issues") + attributes("private_token" + "=" + private_token));
+                JSONArray issuesJson = get_JSONArray(projectJson.getJSONObject("_links").getString("issues") + attributes("access_token" + "=" + private_token));
                 Project finalProject4 = project;
                 issuesJson.forEach(x -> issueRepo.save(new Issue((JSONObject) x, finalProject4.getProjectId())));
 
-                JSONArray commitsJson = get_JSONArray(BASE_URL + "projects/" + project.getProjectId().toString() + "/repository/commits" + attributes("private_token" + "=" + private_token));
+                JSONArray commitsJson = get_JSONArray(BASE_URL + "projects/" + project.getProjectId().toString() + "/repository/commits" + attributes("access_token" + "=" + private_token));
                 Project finalProject5 = project;
                 commitsJson.forEach(x -> commitRepo.save(new Commit((JSONObject) x, finalProject5.getProjectId())));
 
@@ -163,9 +163,9 @@ public class RESTService {
         }
         // if found, then set up hook(send post request to gilab
         if (flag) {
-            JSONArray hooks = get_JSONArray(BASE_URL + "projects/"+project.getProjectId()+"/hooks"+attributes("private_token="+private_token));
+            JSONArray hooks = get_JSONArray(BASE_URL + "projects/"+project.getProjectId()+"/hooks"+attributes("access_token="+private_token));
             if ( hooks.toList().stream().filter(x -> ((HashMap<String,Object>) x).get("url").equals(HOST_IP)).collect(Collectors.toList()).size() == 0){
-                sendPost(BASE_URL + "projects/"+project.getProjectId()+"/hooks","private_token="+private_token,"push_events=true","issues_events=true","enable_ssl_verification=false", "url="+HOST_IP);
+                sendPost(BASE_URL + "projects/"+project.getProjectId()+"/hooks","access_token="+private_token,"push_events=true","issues_events=true","enable_ssl_verification=false", "url="+HOST_IP);
             }
 
         } else {
@@ -231,7 +231,7 @@ public class RESTService {
      */
     private void validateToken(String token) {
         try {
-            get_JSONArray(BASE_URL + "projects" + attributes("visibility=private", "private_token" + "=" + token, "membership=true"));
+            get_JSONArray(BASE_URL + "projects" + attributes("visibility=private", "access_token" + "=" + token, "membership=true"));
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "invalid private token");
         }
